@@ -1,0 +1,43 @@
+.paginator {
+  background-color: var(--background-back-color);
+  min-height: 44px;
+  padding: 10px 20px 10px 20px;
+  display: inline-block;
+  box-sizing: border-box;
+  transition: all var(--input-transition-time) var(--input-timing-function);
+  margin-left: 42px;
+}
+.paginatorPageButton {
+  padding: 0px;
+  width: 23px;
+  height: 21px;
+  font-size: 14px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: normal;
+  line-height: normal;
+  padding-top: 8px;
+}
+.paginatorPageButtonActive {
+  color: var(--input-color);
+}
+.paginatorPageButton:hover {
+  background-color: var(--white-border);
+}
+.paginatorActionButtonNext:hover,
+.paginatorActionButtonPrevious:hover {
+  color: var(--input-color-hovered);
+}
+.paginatorActionButtonNext,
+.paginatorActionButtonPrevious {
+  font-size: 17px;
+  height: 21px;
+  transform: scale(0.5, 1);
+  color: var(--disabled-color);
+  padding: 0px;
+}
+.paginatorActionButtonNext {
+  margin-left: 12px;
+}
+.paginatorActionButtonPrevious {
+  margin-right: 8px;
+}
