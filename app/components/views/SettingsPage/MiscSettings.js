@@ -1,6 +1,7 @@
 import { FormattedMessage as T } from "react-intl";
 import { SettingsInput, NumericInput } from "inputs";
 import { InfoDocFieldModalButton } from "buttons";
+import modalStyle from "../../modals/Modals.module.css";
 
 const propTypes = {
   tempSettings: PropTypes.object.isRequired,
@@ -42,7 +43,7 @@ const MiscSettings = ({
           <div className="settings-label">
             <InfoDocFieldModalButton
               document="GapLimitInfo"
-              modalClassName="has-warning"
+              modalClassName={modalStyle.hasWarning}
               double
               draggable
             />
