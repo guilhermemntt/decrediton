@@ -1,7 +1,6 @@
 import { FormattedMessage as T } from "react-intl";
 import { SettingsInput, NumericInput } from "inputs";
 import { InfoDocFieldModalButton } from "buttons";
-import modalStyle from "../../modals/Modals.module.css";
 
 const propTypes = {
   tempSettings: PropTypes.object.isRequired,
@@ -43,7 +42,11 @@ const MiscSettings = ({
           <div className="settings-label">
             <InfoDocFieldModalButton
               document="GapLimitInfo"
-              modalClassName={modalStyle.hasWarning}
+              /*
+              TODO: has-warning class was defined in Modals.less. After the migration to CSS modules, it's now defined in Modals.module.css as hasWarning.
+              Please, import this CSS rule to the respective Settings CSS module file and use it here.
+              */
+              modalClassName="has-warning"
               double
               draggable
             />
