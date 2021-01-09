@@ -7,7 +7,6 @@ import purchaseTickets from "connectors/purchaseTickets";
 import PurchaseTicketsAdvanced from "./PurchaseTicketsAdvanced";
 import PurchaseTicketsQuickBar from "./PurchaseTicketsQuickBar";
 import { injectIntl } from "react-intl";
-import { isNullOrUndefined } from "util";
 import { MIN_RELAY_FEE, MAX_POSSIBLE_FEE_INPUT } from "constants";
 
 @autobind
@@ -154,8 +153,8 @@ class PurchaseTickets extends React.Component {
     const pool = this.state.stakePool;
     return pool
       ? this.props.configuredStakePools.find(
-          compose(eq(pool.Host), get("Host"))
-        )
+        compose(eq(pool.Host), get("Host"))
+      )
       : null;
   }
 
@@ -164,7 +163,7 @@ class PurchaseTickets extends React.Component {
     return (
       this.state.account &&
       this.state.account.spendable >
-        this.props.ticketPrice * this.state.numTicketsToBuy
+      this.props.ticketPrice * this.state.numTicketsToBuy
     );
   }
 
@@ -252,7 +251,7 @@ class PurchaseTickets extends React.Component {
 
   onChangeExpiry(expiry) {
     const expiryError =
-      isNaN(expiry) || expiry < 0 || isNullOrUndefined(expiry) || expiry === "";
+      isNaN(expiry) || expiry < 0 || expiry === null || expiry === undefined || expiry === "";
     this.setState({
       expiry: expiry.replace(/[^\d.]/g, ""),
       expiryError: expiryError

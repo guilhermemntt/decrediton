@@ -15,7 +15,6 @@ export { concat, isString, cloneDeep } from "lodash";
 
 import compose from "lodash/fp/compose";
 import get from "lodash/fp/get";
-import { isFunction } from "util";
 
 export const not = (fn) => (...args) => !fn(...args);
 export const bool = compose(not, not);
@@ -62,7 +61,7 @@ export const replace = (list, predicate, replacement) => {
     return list;
   }
 
-  const rep = isFunction(replacement)
+  const rep = typeof replacement === "function"
     ? replacement(list[idx], list, idx)
     : replacement;
 

@@ -1,6 +1,4 @@
 import { ipcRenderer } from "electron";
-import { isObject, isString, isNumber, isUndefined, isNull } from "util";
-import { isFunction } from "util";
 
 export const onAppReloadRequested = (cb) =>
   ipcRenderer.on("app-reload-requested", cb);
@@ -18,12 +16,12 @@ export const logOptionNoResponseData = (opts) => ({
 // Formats a dynamic list of log arguments
 const formatLogArgs = (msg, args) => {
   const formatArg = (arg) => {
-    if (isObject(arg) && isFunction(arg.toObject)) {
+    if (arg !== null && typeof arg === "object" && typeof arg.toObject === "function") {
       // requests/responses on the grpc system have a toObejct() func
       return JSON.stringify(arg.toObject());
-    } else if (isUndefined(arg)) {
+    } else if (arg === undefined) {
       return "[undefined]";
-    } else if (isString(arg) || isNumber(arg) || isNull(arg)) {
+    } else if (typeof arg === "string" || typeof arg === "number" || arg === null) {
       return arg;
     } else {
       return JSON.stringify(arg);

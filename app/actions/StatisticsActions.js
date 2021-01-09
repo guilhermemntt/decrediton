@@ -1,7 +1,6 @@
 import * as wallet from "wallet";
 import * as sel from "selectors";
 import fs from "fs";
-import { isNumber, isNullOrUndefined, isUndefined } from "util";
 import { endOfDay, formatLocalISODate, isSameDate } from "helpers";
 import {
   REGULAR,
@@ -244,8 +243,8 @@ const countTicketsBackwards = ({ mined, chainParams, tsDate }) => {
     if (lastTxDate.getTime() !== lastDate.getTime()) {
       values[lastDate]
         ? Object.keys(ticketsCounter).forEach(
-            (k) => (values[lastDate][k] += ticketsCounter[k])
-          )
+          (k) => (values[lastDate][k] += ticketsCounter[k])
+        )
         : (values[lastDate] = Object.assign({}, ticketsCounter));
       Object.keys(ticketsCounter).forEach((k) => (ticketsCounter[k] = 0));
       lastDate = lastTxDate;
@@ -261,9 +260,9 @@ const countTicketsBackwards = ({ mined, chainParams, tsDate }) => {
         ticketsCounter.maturing++;
         values[tsWillMatureDate] = values[tsWillMatureDate]
           ? {
-              ...values[tsWillMatureDate],
-              live: values[tsWillMatureDate].live + 1
-            }
+            ...values[tsWillMatureDate],
+            live: values[tsWillMatureDate].live + 1
+          }
           : { live: 1, maturing: 0, vote: 0, revoke: 0 };
         break;
       case VOTE:
@@ -355,7 +354,7 @@ export const exportStatToCSV = (opts) => (dispatch, getState) => {
   const quote = (v) => '"' + v.replace('"', '\\"') + '"';
   const formatTime = (v) => (v ? formatLocalISODate(v, timezone) : "");
   const csvValue = (v) =>
-    isNullOrUndefined(v) ? "" : isNumber(v) ? v.toFixed(precision) : quote(v);
+    (v === null || v === undefined) ? "" : typeof v === "number" ? v.toFixed(precision) : quote(v);
   const csvLine = (values) => values.map(csvValue).join(vsep);
 
   const seriesValueFormatFunc = (series) => {
@@ -391,7 +390,7 @@ export const exportStatToCSV = (opts) => (dispatch, getState) => {
   // called once for each data line
   const progressFunction = (time, series) => {
     const values = allSeries.map((s) =>
-      !isUndefined(series[s.name]) ? s.valueFormatFunc(series[s.name]) : null
+      series[s.name] !== undefined ? s.valueFormatFunc(series[s.name]) : null
     );
 
     !seriesOpts.noTimestamp && values.unshift(formatTime(time));
@@ -502,7 +501,7 @@ const findTimestampByBlockHeight = (
   const largeStakeTimeDiff =
     toHeight - fromHeight > chainParams.TicketMaturity &&
     toTimestamp - fromTimestamp >
-      (toHeight - fromHeight) * chainParams.TargetTimePerBlock;
+    (toHeight - fromHeight) * chainParams.TargetTimePerBlock;
   const blockInterval = (toTimestamp - fromTimestamp) / (toHeight - fromHeight);
   let timestamp;
   if (fromHeight === toHeight) {
@@ -861,12 +860,12 @@ const txDataCbBackwards = async ({
     const delta = toAddDeltas[i]
       ? toAddDeltas[i]
       : await txBalancesDelta(
-          tx,
-          maturingTxs,
-          liveTickets,
-          walletService,
-          chainParams
-        );
+        tx,
+        maturingTxs,
+        liveTickets,
+        walletService,
+        chainParams
+      );
     turnFieldsNegative(delta);
 
     let j = i + 1;

@@ -1,6 +1,5 @@
 import { FormattedMessage as T } from "react-intl";
 import "style/Input.less";
-import { isNullOrUndefined } from "util";
 
 class Input extends React.Component {
   constructor(props) {
@@ -82,9 +81,9 @@ class Input extends React.Component {
           className={
             hasErrorToShow
               ? this.state.divClassName + " error"
-            : showSuccess
-              ? this.state.divClassName + " success"
-              : this.state.divClassName
+              : showSuccess
+                ? this.state.divClassName + " success"
+                : this.state.divClassName
           }
           ref={(div) => {
             this.state.inputUnitDiv = div;
@@ -98,7 +97,7 @@ class Input extends React.Component {
             disabled={disabled ? disabled : null}
             readOnly={readOnly ? readOnly : null}
             placeholder={placeholder}
-            value={isNullOrUndefined(value) ? "" : value}
+            value={value === null || value === undefined ? "" : value}
             onChange={onChange}
             onFocus={this.onInputFocus}
             onBlur={this.onInputBlur}
@@ -117,8 +116,8 @@ class Input extends React.Component {
                 {invalidMessage ? (
                   invalidMessage
                 ) : (
-                  <T id="input.invalidInput" m="This field is wrong" />
-                )}
+                    <T id="input.invalidInput" m="This field is wrong" />
+                  )}
               </div>
             ) : null}
             {required && !value ? (
@@ -126,8 +125,8 @@ class Input extends React.Component {
                 {requiredMessage ? (
                   requiredMessage
                 ) : (
-                  <T id="input.requiredInput" m="This field is required" />
-                )}
+                    <T id="input.requiredInput" m="This field is required" />
+                  )}
               </div>
             ) : null}
           </div>

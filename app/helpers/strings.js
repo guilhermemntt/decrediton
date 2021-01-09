@@ -1,5 +1,3 @@
-import { isString } from "util";
-
 // @flow
 
 // This function adds spaces around text to fix an issue with double-clicking to select it
@@ -28,7 +26,7 @@ export function restrictToStdDecimalNumber(s) {
 // This function does **not** pad the string if less than maxFracDigits are
 // present.
 export function limitFractionalDigits(s, maxFracDigits) {
-  if (!isString(s)) return s;
+  if (typeof s !== "string") return s;
 
   const match = s.match(/(\d+)\.(\d*)/);
   if (!match) return s;

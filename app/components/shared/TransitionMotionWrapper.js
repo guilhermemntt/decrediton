@@ -1,6 +1,5 @@
 import { cloneElement as k, createElement as h } from "react";
 import { TransitionMotion } from "react-motion";
-import { isFunction } from "util";
 import { useTheming } from "hooks";
 
 const TransitionMotionWrapper = ({
@@ -21,7 +20,7 @@ const TransitionMotionWrapper = ({
   const children = (children) =>
     h("div", { className: props.className }, children.map(child));
   if (!uiAnimations) {
-    const actual = isFunction(styles) ? styles(props) : styles;
+    const actual = typeof styles === "function" ? styles(props) : styles;
     return h("div", {}, children(actual));
   }
 

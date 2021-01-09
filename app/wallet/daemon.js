@@ -1,6 +1,5 @@
 import Promise from "promise";
 import { ipcRenderer } from "electron";
-import { isString } from "util";
 import { withLog as log, logOptionNoResponseData } from "./app";
 
 export const checkDecreditonVersion = log(
@@ -131,10 +130,10 @@ export const getBlockCount = log(
   () =>
     new Promise((resolve) => {
       ipcRenderer.once("check-daemon-response", (e, info) => {
-        const blockCount = isString(info.blockCount)
+        const blockCount = typeof info.blockCount === "string"
           ? parseInt(info.blockCount.trim())
           : info.blockCount;
-        const syncHeight = isString(info.syncHeight)
+        const syncHeight = typeof info.syncHeight === "string"
           ? parseInt(info.syncHeight.trim())
           : info.syncHeight;
         resolve({ blockCount, syncHeight });

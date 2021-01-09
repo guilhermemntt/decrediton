@@ -9,11 +9,10 @@ import {
   radiusFull,
   hoverFill
 } from "./Styles";
-import { isArray } from "util";
 import { FormattedMessage as T } from "react-intl";
 
 const ChartTooltip = ({ payload }) => {
-  if (!payload || !isArray(payload) || !payload.length) {
+  if (!payload || !Array.isArray(payload) || !payload.length) {
     return (
       <div className="chart-tooltip">
         <T id="charts.voteTime.noVotesDay" m="No tickets voted in this range" />
