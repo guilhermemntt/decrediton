@@ -99,7 +99,7 @@ const Form = ({
                   <T id="send.confirmAmountAccount" m="Destination account" />:
                 </div>
                 <div className={styles.passphraseModalAddress}>
-                  {nextAddressAccount.name}
+                  {nextAddressAccount && nextAddressAccount.name}
                 </div>
               </>
             )}

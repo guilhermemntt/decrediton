@@ -28,10 +28,15 @@ function ReceiveAccountsSelect({
   );
 
   useEffect(() => {
+    if(!nextAddressAccount) return;
     if (account && account != nextAddressAccount.value) {
       getNextAddressAttempt(account);
     }
-  }, [account, getNextAddressAttempt, nextAddressAccount.value]);
+  }, [account, getNextAddressAttempt, nextAddressAccount]);
+
+  const accountA = (!nextAddressAccount || account && account != nextAddressAccount.value)
+  ? null
+  : nextAddressAccount;
 
   return (
     <AccountsSelect
@@ -45,10 +50,7 @@ function ReceiveAccountsSelect({
         // needs to be called with it, which updates nextAddressAccount
         // eventually. Until it happens, it's better to show no account
         // than a previously chosen one.
-        account:
-          account && account != nextAddressAccount.value
-            ? null
-            : nextAddressAccount,
+        account: accountA,
         disabled
       }}
     />

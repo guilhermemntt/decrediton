@@ -280,6 +280,7 @@ const SendTransaction = ({
 
   // Executes on component updates
   useEffect(() => {
+    if(!nextAddressAccount?.value) return;
     let newOutputs;
     if (publishTxResponse && publishTxResponse != prevPublishTxResponse) {
       if (isSendSelf) {
@@ -319,7 +320,7 @@ const SendTransaction = ({
     nextAddress,
     prevIsSendSelf,
     constructTxLowBalance,
-    nextAddressAccount.value,
+    nextAddressAccount,
     outputs,
     prevOutputs,
     onSetOutputs,
