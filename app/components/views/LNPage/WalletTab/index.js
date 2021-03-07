@@ -3,8 +3,9 @@ const dialog = electron.remote.dialog;
 import fs from "fs";
 import { DescriptionHeader } from "layout";
 import { FormattedMessage as T } from "react-intl";
-import { lnPage } from "connectors";
 import Page from "./Page";
+import { useEffect, useState } from "react";
+import { useLNPage } from "../hooks";
 
 export const WalletTabHeader = () => (
   <DescriptionHeader
@@ -17,68 +18,79 @@ export const WalletTabHeader = () => (
   />
 );
 
-@autobind
-class WalletTab extends React.Component {
-  constructor(props) {
-    super(props);
-    setTimeout(() => this.props.updateWalletBalances(), 1000);
-    this.state = {
-      amount: 0,
-      account: props.defaultAccount,
-      actionsEnabled: false,
-      confirmFileOverwrite: null
-    };
+const WalletTab = () => {
+  const [amount, setAmount] = useState(0);
+  const [account, setAccount] = useState(props.defaultAccount);
+  const [actionsEnabled, setActionsEnabled] = useState(false);
+  const [confirmFileOverwrite, setConfirmFileOverwrite] = useState(null);
+
+  const {
+    updateWalletBalances,
+    fundWallet,
+    withdrawWallet,
+    exportBackup,
+    verifyBackup,
+    walletBalances,
+    info,
+  } = useLNPage();
+
+  useEffect(() => {
+    setTimeout(() => updateWalletBalances(), 1000);
+  }, [])
+
+  const onChangeAmount = (amount) => {
+    const actionsEnabled = amount > 0 && account;
+    setAmount(amount);
+    setActionsEnabled(actionsEnabled);
   }
 
-  onChangeAmount(amount) {
-    const actionsEnabled = amount > 0 && this.state.account;
-    this.setState({ amount, actionsEnabled });
+  const onChangeAccount = (account) => {
+    const actionsEnabled = amount > 0 && account;
+    setAccount(account);
+    setActionsEnabled(actionsEnabled);
   }
 
-  onChangeAccount(account) {
-    const actionsEnabled = this.state.amount > 0 && account;
-    this.setState({ account, actionsEnabled });
-  }
-
-  onFundWallet(passphrase) {
-    this.setState({ sending: true });
-    this.props
-      .fundWallet(this.state.amount, this.state.account.value, passphrase)
+  const onFundWallet = (passphrase) => {
+    setSending(true);
+    fundWallet(amount, account.value, passphrase)
       .then(() => {
-        this.setState({ sending: false, amount: 0, actionsEnabled: false });
+        setSending(false);
+        setAmount(0);
+        setActionsEnabled(false);
       })
       .catch(() => {
-        this.setState({ sending: false });
+        setSending(false);
       });
   }
 
-  onWithdrawWallet() {
-    this.setState({ sending: true });
-    this.props
-      .withdrawWallet(this.state.amount, this.state.account.value)
+  const onWithdrawWallet = () => {
+    setSending(true);
+    withdrawWallet(amount, account.value)
       .then(() => {
-        this.setState({ sending: false, amount: 0, actionsEnabled: false });
+        setSending(false);
+        setAmount(0);
+        setActionsEnabled(false);
       })
       .catch(() => {
-        this.setState({ sending: false });
+        setSending(false);
       });
   }
 
-  async onConfirmFileOverwrite() {
-    const filePath = this.state.confirmFileOverwrite;
+  const onConfirmFileOverwrite = async () => {
+    const filePath = confirmFileOverwrite;
     if (!filePath) {
       return;
     }
-    this.setState({ confirmFileOverwrite: null });
-    await this.props.exportBackup(filePath);
+    setConfirmFileOverwrite(null);
+    await exportBackup(filePath);
   }
 
-  onCancelFileOverwrite() {
-    this.setState({ confirmFileOverwrite: null });
+  const onCancelFileOverwrite = () => {
+    setConfirmFileOverwrite(null);
   }
 
-  async onBackup() {
-    this.setState({ confirmFileOverwrite: null });
+  const onBackup = async () => {
+    setConfirmFileOverwrite(null);
 
     const { filePath } = await dialog.showSaveDialog();
     if (!filePath) {
@@ -87,74 +99,55 @@ class WalletTab extends React.Component {
 
     // If this file already exists, show the confirmation modal.
     if (fs.existsSync(filePath)) {
-      this.setState({ confirmFileOverwrite: filePath });
+      setConfirmFileOverwrite(filePath);
       return;
     }
 
-    await this.props.exportBackup(filePath);
+    await exportBackup(filePath);
   }
 
-  async onVerifyBackup() {
+  const onVerifyBackup = async () => {
     const { filePaths } = await dialog.showOpenDialog();
     const filePath = filePaths[0];
     if (!filePath) {
       return;
     }
 
-    await this.props.verifyBackup(filePath);
+    await verifyBackup(filePath);
   }
 
-  render() {
-    const {
-      confirmedBalance,
-      unconfirmedBalance,
-      totalBalance
-    } = this.props.walletBalances;
-    const {
-      account,
-      amount,
-      actionsEnabled,
-      sending,
-      confirmFileOverwrite
-    } = this.state;
-    const { alias, identityPubkey } = this.props.info;
-    const { scbPath, scbUpdatedTime, tsDate } = this.props;
-    const {
-      onChangeAmount,
-      onChangeAccount,
-      onFundWallet,
-      onWithdrawWallet,
-      onBackup,
-      onVerifyBackup,
-      onCancelFileOverwrite,
-      onConfirmFileOverwrite
-    } = this;
+  const {
+    confirmedBalance,
+    unconfirmedBalance,
+    totalBalance
+  } = walletBalances;
 
-    return (
-      <Page
-        alias={alias}
-        identityPubkey={identityPubkey}
-        confirmedBalance={confirmedBalance}
-        unconfirmedBalance={unconfirmedBalance}
-        account={account}
-        amount={amount}
-        totalBalance={totalBalance}
-        actionsEnabled={actionsEnabled && !sending}
-        tsDate={tsDate}
-        scbPath={scbPath}
-        scbUpdatedTime={scbUpdatedTime}
-        confirmFileOverwrite={confirmFileOverwrite}
-        onChangeAmount={onChangeAmount}
-        onChangeAccount={onChangeAccount}
-        onFundWallet={onFundWallet}
-        onWithdrawWallet={onWithdrawWallet}
-        onBackup={onBackup}
-        onVerifyBackup={onVerifyBackup}
-        onCancelFileOverwrite={onCancelFileOverwrite}
-        onConfirmFileOverwrite={onConfirmFileOverwrite}
-      />
-    );
-  }
-}
+  const { alias, identityPubkey } = info;
 
-export default lnPage(WalletTab);
+  return (
+    <Page
+      alias={alias}
+      identityPubkey={identityPubkey}
+      confirmedBalance={confirmedBalance}
+      unconfirmedBalance={unconfirmedBalance}
+      account={account}
+      amount={amount}
+      totalBalance={totalBalance}
+      actionsEnabled={actionsEnabled && !sending}
+      tsDate={tsDate}
+      scbPath={scbPath}
+      scbUpdatedTime={scbUpdatedTime}
+      confirmFileOverwrite={confirmFileOverwrite}
+      onChangeAmount={onChangeAmount}
+      onChangeAccount={onChangeAccount}
+      onFundWallet={onFundWallet}
+      onWithdrawWallet={onWithdrawWallet}
+      onBackup={onBackup}
+      onVerifyBackup={onVerifyBackup}
+      onCancelFileOverwrite={onCancelFileOverwrite}
+      onConfirmFileOverwrite={onConfirmFileOverwrite}
+    />
+  );
+};
+
+export default WalletTab;

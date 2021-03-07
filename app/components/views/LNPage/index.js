@@ -1,7 +1,6 @@
 import { TabbedPage, TabbedPageTab as Tab, TitleHeader } from "layout";
 import { FormattedMessage as T } from "react-intl";
 import { Switch, Redirect } from "react-router-dom";
-import { lnPage } from "connectors";
 import LNConnectPage from "./ConnectPage";
 import { default as WalletTab, WalletTabHeader } from "./WalletTab";
 import { default as ChannelsTab, ChannelsTabHeader } from "./ChannelsTab";
@@ -12,6 +11,8 @@ import NetworkTab from "./NetworkTab/NetworkTab";
 import WatchtowersTab from "./WatchtowersTab/WatchtowersTab";
 import WatchtowersTabHeader from "./WatchtowersTab/WatchtowersTabHeader";
 import { LN_ICON } from "constants";
+import "style/Documentation.less";
+import { useLNPage } from "./hooks";
 
 const LNPageHeader = () => (
   <TitleHeader
@@ -64,7 +65,9 @@ const LNActivePage = () => (
   </TabbedPage>
 );
 
-const LNPage = ({ lnActive }) =>
-  lnActive ? <LNActivePage /> : <LNConnectPage />;
+const LNPage = () => {
+  const {lnActive} = useLNPage();
 
-export default lnPage(LNPage);
+  return lnActive ? <LNActivePage /> : <LNConnectPage />;
+}
+export default LNPage;

@@ -1,7 +1,8 @@
 import { DescriptionHeader } from "layout";
 import { FormattedMessage as T } from "react-intl";
-import { lnPage } from "connectors";
 import Page from "./Page";
+import { useState } from "react";
+import { useLNPage } from "../hooks";
 
 export const ChannelsTabHeader = () => (
   <DescriptionHeader
@@ -14,116 +15,92 @@ export const ChannelsTabHeader = () => (
   />
 );
 
-@autobind
-class ChannelsTab extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      node: "",
-      localAmtAtoms: 0,
-      pushAmtAtoms: 0,
-      canOpen: false,
-      opening: false
-    };
+const ChannelsTab = () => {
+  const [node, setNode] = useState("");
+  const [localAmtAtoms, setLocalAmtAtoms] = useState(0);
+  const [pushAmtAtoms, setPushAmtAtoms] = useState(0);
+  const [canOpen, setCanOpen] = useState(false);
+  const [opening, setOpening] = useState(false);
+
+  const {
+    walletBalances,
+    channelBalances,
+    channels,
+    pendingChannels,
+    closedChannels,
+    isMainNet,
+    openChannel,
+    closeChannel
+  } = useLNPage();
+
+  const onNodeChanged = (e) => {
+    const _canOpen = e.target.value && localAmtAtoms > 0;
+    setNode(("" + e.target.value).trim());
+    setCanOpen(_canOpen);
   }
 
-  onNodeChanged(e) {
-    const canOpen = e.target.value && this.state.localAmtAtoms > 0;
-    this.setState({ node: ("" + e.target.value).trim(), canOpen });
+  const onLocalAmtChanged = ({ atomValue }) => {
+    const _canOpen = atomValue > 0 && node;
+    setLocalAmtAtoms(atomValue);
+    setCanOpen(_canOpen);
   }
 
-  onLocalAmtChanged({ atomValue }) {
-    const canOpen = atomValue > 0 && this.state.node;
-    this.setState({ localAmtAtoms: atomValue, canOpen });
+  const onPushAmtChanged = ({ atomValue }) => {
+    setPushAmtAtoms(atomValue);
   }
 
-  onPushAmtChanged({ atomValue }) {
-    this.setState({ pushAmtAtoms: atomValue });
-  }
-
-  onOpenChannel() {
-    const { node, localAmtAtoms, pushAmtAtoms } = this.state;
+  const onOpenChannel = () => {
     if (!node || !localAmtAtoms) {
       return;
     }
-    this.setState({ opening: true });
-    this.props
-      .openChannel(node, localAmtAtoms, pushAmtAtoms)
+    setOpening(true);
+    openChannel(node, localAmtAtoms, pushAmtAtoms)
       .then(() => {
-        this.setState({
-          opening: false,
-          node: "",
-          localAmtAtoms: 0,
-          pushAmtAtoms: 0,
-          canOpen: false
-        });
+        setOpening(false)
+        setNode("")
+        setLocalAmtAtoms(0)
+        setPushAmtAtoms(0)
+        setCanOpen(false)
       })
       .catch(() => {
-        this.setState({ opening: false });
+        setOpening(false);
       });
   }
 
-  onCloseChannel(channel) {
-    this.props.closeChannel(channel.channelPoint, !channel.active);
+  const onCloseChannel = (channel) => {
+    closeChannel(channel.channelPoint, !channel.active);
   }
 
-  onToggleChannelDetails(channel) {
-    if (this.state.detailedChannel === channel) {
-      this.setState({ detailedChannel: null });
+  const onToggleChannelDetails = (channel) => {
+    if (detailedChannel === channel) {
+      setDetailedChannel(null);
     } else {
-      this.setState({ detailedChannel: channel });
+      setDetailedChannel(channel);
     }
   }
 
-  render() {
-    const {
-      walletBalances,
-      channelBalances,
-      channels,
-      pendingChannels,
-      closedChannels,
-      isMainNet
-    } = this.props;
-    const {
-      node,
-      localAmtAtoms,
-      pushAmtAtoms,
-      opening,
-      canOpen,
-      detailedChannel
-    } = this.state;
-    const {
-      onNodeChanged,
-      onLocalAmtChanged,
-      onPushAmtChanged,
-      onOpenChannel,
-      onCloseChannel,
-      onToggleChannelDetails
-    } = this;
-
-    return (
-      <Page
-        walletBalances={walletBalances}
-        channelBalances={channelBalances}
-        channels={channels}
-        pendingChannels={pendingChannels}
-        closedChannels={closedChannels}
-        node={node}
-        localAmt={localAmtAtoms}
-        pushAmt={pushAmtAtoms}
-        opening={opening}
-        canOpen={canOpen}
-        detailedChannel={detailedChannel}
-        isMainNet={isMainNet}
-        onNodeChanged={onNodeChanged}
-        onLocalAmtChanged={onLocalAmtChanged}
-        onPushAmtChanged={onPushAmtChanged}
-        onOpenChannel={onOpenChannel}
-        onCloseChannel={onCloseChannel}
-        onToggleChannelDetails={onToggleChannelDetails}
-      />
-    );
-  }
+  return (
+    <Page
+      walletBalances={walletBalances}
+      channelBalances={channelBalances}
+      channels={channels}
+      pendingChannels={pendingChannels}
+      closedChannels={closedChannels}
+      node={node}
+      localAmt={localAmtAtoms}
+      pushAmt={pushAmtAtoms}
+      opening={opening}
+      canOpen={canOpen}
+      detailedChannel={detailedChannel}
+      isMainNet={isMainNet}
+      onNodeChanged={onNodeChanged}
+      onLocalAmtChanged={onLocalAmtChanged}
+      onPushAmtChanged={onPushAmtChanged}
+      onOpenChannel={onOpenChannel}
+      onCloseChannel={onCloseChannel}
+      onToggleChannelDetails={onToggleChannelDetails}
+    />
+  );
 }
 
-export default lnPage(ChannelsTab);
+export default ChannelsTab;

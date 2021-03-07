@@ -1,8 +1,8 @@
 import { DescriptionHeader } from "layout";
 import { FormattedMessage as T } from "react-intl";
-import { lnPage } from "connectors";
 import Page from "./Page";
 import ReactTimeout from "react-timeout";
+import { useLNPage } from "../hooks";
 
 export const PaymentsTabHeader = () => (
   <DescriptionHeader
@@ -12,122 +12,98 @@ export const PaymentsTabHeader = () => (
   />
 );
 
-@autobind
-class PaymentsTab extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      sendValueAtom: 0,
-      payRequest: "",
-      decodedPayRequest: null,
-      decodingError: null,
-      expired: false
-    };
-    this.lastDecodeTimer = null;
-  }
+const PaymentsTab = ({ setTimeout, clearTimeout }) => {
+  const [sendValueAtom, setSendValueAtom] = useState(0);
+  const [payRequest, setPayRequest] = useState("");
+  const [decodedPayRequest, setDecodedPayRequest] = useState(null);
+  const [decodingError, setDecodingError] = useState(null);
+  const [expired, setExpired] = useState(false);
 
-  checkExpired() {
-    const { decodedPayRequest } = this.state;
+  const lastDecodeTimer = useRef(null);
+
+  const {
+    payments,
+    outstandingPayments,
+    failedPayments,
+    tsDate,
+    decodePayRequest,
+    sendPayment
+  } = useLNPage();
+
+  const checkExpired = () => {
     if (!decodedPayRequest) return;
-
     const timeToExpire =
       (decodedPayRequest.timestamp + decodedPayRequest.expiry) * 1000 -
       Date.now();
     if (timeToExpire < 0) {
-      this.setState({ expired: true });
+      setState({ expired: true });
     }
   }
 
-  decodePayRequest() {
-    this.lastDecodeTimer = null;
-    if (!this.state.payRequest) {
-      this.setState({ decodingError: null, decodedPayRequest: null });
+  const decodePayRequestCallback = () => {
+    lastDecodeTimer.current = null;
+    if (!payRequest) {
+      setDecodingError(null);
+      setDecodedPayRequest(null);
       return;
     }
-    this.props
-      .decodePayRequest(this.state.payRequest)
+    decodePayRequest(payRequest)
       .then((resp) => {
         const timeToExpire = (resp.timestamp + resp.expiry) * 1000 - Date.now();
         const expired = timeToExpire < 0;
         if (!expired) {
-          this.props.setTimeout(this.checkExpired, timeToExpire + 1000);
+          setTimeout(checkExpired, timeToExpire + 1000);
         }
-        this.setState({
-          decodedPayRequest: resp,
-          decodingError: null,
-          expired
-        });
+        setDecodedPayRequest(resp);
+        setDecodingError(null);
+        setExpired(expired);
       })
       .catch((error) => {
-        this.setState({ decodedPayRequest: null, decodingError: error });
+        setState({ decodedPayRequest: null, decodingError: error });
       });
   }
 
-  onPayRequestChanged(e) {
-    this.setState({
-      payRequest: ("" + e.target.value).trim(),
-      decodedPayRequest: null,
-      expired: false
-    });
-    if (this.lastDecodeTimer) {
-      this.props.clearTimeout(this.lastDecodeTimer);
+  const onPayRequestChanged = (e) => {
+    setPayRequest(("" + e.target.value).trim());
+    setDecodedPayRequest(null);
+    setExpired(false);
+    if (lastDecodeTimer.current) {
+      clearTimeout(lastDecodeTimer.current);
     }
-    this.lastDecodeTimer = this.props.setTimeout(this.decodePayRequest, 1000);
+    lastDecodeTimer.current = setTimeout(decodePayRequestCallback, 1000);
   }
 
-  onSendValueChanged({ atomValue }) {
-    this.setState({ sendValueAtom: atomValue });
+  const onSendValueChanged = ({ atomValue }) => {
+    setSendValueAtom(atomValue);
   }
 
-  onSendPayment() {
-    if (!this.state.payRequest || !this.state.decodedPayRequest) {
+  const onSendPayment = () => {
+    if (!payRequest || !decodedPayRequest) {
       return;
     }
-
-    const { payRequest, sendValueAtom } = this.state;
-    this.setState({
-      payRequest: "",
-      decodedPayRequest: null,
-      sendValue: 0
-    });
-    this.props.sendPayment(payRequest, sendValueAtom);
+    setPayRequest("");
+    setDecodedPayRequest(null);
+    setSendValue(0);
+    sendPayment(payRequest, sendValueAtom);
   }
 
-  render() {
-    const {
-      payments,
-      outstandingPayments,
-      failedPayments,
-      tsDate
-    } = this.props;
-    const {
-      payRequest,
-      decodedPayRequest,
-      decodingError,
-      expired,
-      sending,
-      sendValueAtom
-    } = this.state;
-    const { onPayRequestChanged, onSendPayment, onSendValueChanged } = this;
+  return (
+    <Page
+      payments={payments}
+      outstandingPayments={outstandingPayments}
+      failedPayments={failedPayments}
+      tsDate={tsDate}
+      payRequest={payRequest}
+      decodedPayRequest={decodedPayRequest}
+      decodingError={decodingError}
+      expired={expired}
+      sending={sending}
+      sendValue={sendValueAtom}
+      onPayRequestChanged={onPayRequestChanged}
+      onSendPayment={onSendPayment}
+      onSendValueChanged={onSendValueChanged}
+    />
+  );
+};
 
-    return (
-      <Page
-        payments={payments}
-        outstandingPayments={outstandingPayments}
-        failedPayments={failedPayments}
-        tsDate={tsDate}
-        payRequest={payRequest}
-        decodedPayRequest={decodedPayRequest}
-        decodingError={decodingError}
-        expired={expired}
-        sending={sending}
-        sendValue={sendValueAtom}
-        onPayRequestChanged={onPayRequestChanged}
-        onSendPayment={onSendPayment}
-        onSendValueChanged={onSendValueChanged}
-      />
-    );
-  }
-}
-
-export default lnPage(ReactTimeout(PaymentsTab));
+export default ReactTimeout(PaymentsTab);
