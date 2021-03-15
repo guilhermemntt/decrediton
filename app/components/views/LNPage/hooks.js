@@ -70,6 +70,6 @@ export function useLNPage() {
     withdrawWallet,
     startDcrlnd,
     exportBackup,
-    verifyBackup,
+    verifyBackup
   };
 };

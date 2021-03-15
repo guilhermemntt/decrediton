@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { DescriptionHeader } from "layout";
 import { FormattedMessage as T } from "react-intl";
 import * as sel from "selectors";
@@ -24,12 +25,14 @@ const InvoicesTab = () => {
   const [atomValue, setAtomValue] = useState(0);
   const [memo, setMemo] = useState("");
   const [lastPayRequest, setLastPayRequest] = useState("");
+  const [, setValue] = useState();
+  const [lastError, setLastError] = useState("");
 
   const { invoices, tsDate, addInvoiceAttempt, addInvoice } = useLNPage();
 
   const onValueChanged = ({ atomValue }) => {
     setAtomValue(atomValue);
-  }
+  };
 
   const onMemoChanged = (e) => {
     if (e.target.value.length > 639) {
@@ -38,7 +41,7 @@ const InvoicesTab = () => {
     }
 
     setMemo(e.target.value);
-  }
+  };
 
   const onAddInvoice = () => {
     setLastPayRequest("");
@@ -52,7 +55,7 @@ const InvoicesTab = () => {
       .catch((error) => {
         setLastError(error);
       });
-  }
+  };
 
   return (
     <Page

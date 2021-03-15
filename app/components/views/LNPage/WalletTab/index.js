@@ -19,11 +19,6 @@ export const WalletTabHeader = () => (
 );
 
 const WalletTab = () => {
-  const [amount, setAmount] = useState(0);
-  const [account, setAccount] = useState(props.defaultAccount);
-  const [actionsEnabled, setActionsEnabled] = useState(false);
-  const [confirmFileOverwrite, setConfirmFileOverwrite] = useState(null);
-
   const {
     updateWalletBalances,
     fundWallet,
@@ -32,23 +27,33 @@ const WalletTab = () => {
     verifyBackup,
     walletBalances,
     info,
+    defaultAccount,
+    scbPath,
+    scbUpdatedTime,
+    tsDate
   } = useLNPage();
+
+  const [amount, setAmount] = useState(0);
+  const [account, setAccount] = useState(defaultAccount);
+  const [actionsEnabled, setActionsEnabled] = useState(false);
+  const [confirmFileOverwrite, setConfirmFileOverwrite] = useState(null);
+  const [sending, setSending] = useState(false);
 
   useEffect(() => {
     setTimeout(() => updateWalletBalances(), 1000);
-  }, [])
+  }, [updateWalletBalances]);
 
   const onChangeAmount = (amount) => {
     const actionsEnabled = amount > 0 && account;
     setAmount(amount);
     setActionsEnabled(actionsEnabled);
-  }
+  };
 
   const onChangeAccount = (account) => {
     const actionsEnabled = amount > 0 && account;
     setAccount(account);
     setActionsEnabled(actionsEnabled);
-  }
+  };
 
   const onFundWallet = (passphrase) => {
     setSending(true);
@@ -61,7 +66,7 @@ const WalletTab = () => {
       .catch(() => {
         setSending(false);
       });
-  }
+  };
 
   const onWithdrawWallet = () => {
     setSending(true);
@@ -74,7 +79,7 @@ const WalletTab = () => {
       .catch(() => {
         setSending(false);
       });
-  }
+  };
 
   const onConfirmFileOverwrite = async () => {
     const filePath = confirmFileOverwrite;
@@ -83,11 +88,11 @@ const WalletTab = () => {
     }
     setConfirmFileOverwrite(null);
     await exportBackup(filePath);
-  }
+  };
 
   const onCancelFileOverwrite = () => {
     setConfirmFileOverwrite(null);
-  }
+  };
 
   const onBackup = async () => {
     setConfirmFileOverwrite(null);
@@ -104,7 +109,7 @@ const WalletTab = () => {
     }
 
     await exportBackup(filePath);
-  }
+  };
 
   const onVerifyBackup = async () => {
     const { filePaths } = await dialog.showOpenDialog();
@@ -114,7 +119,7 @@ const WalletTab = () => {
     }
 
     await verifyBackup(filePath);
-  }
+  };
 
   const {
     confirmedBalance,

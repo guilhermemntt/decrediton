@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { spring } from "react-motion";
 import { StandalonePage, StandaloneHeader } from "layout";
 import { FormattedMessage as T } from "react-intl";
@@ -107,8 +108,8 @@ const ConnectPage = () => {
   const [displayCreationWarning, setDisplayCreationWarning] = useState(!lightningWalletExists);
 
   const onChangeAccount = (account) => {
-    setAccount(ccount);
-  }
+    setAccount(account);
+  };
 
   const onLaunch = (passphrase) => {
     let account = null;
@@ -126,24 +127,21 @@ const ConnectPage = () => {
       account,
       scbFile
     );
-  }
+  };
 
   const onChangeEnableAutopilot = () => {
     setAutopilotEnabled(autopilotEnabled);
-  }
+  };
 
   const onAccountOptionClick = (value) => {
-    setAccountOption(alue);
-  }
+    setAccountOption(value);
+  };
 
   const onAcceptCreationWarning = () => {
-    setDisplayCreationWarning(alse);
-  }
+    setDisplayCreationWarning(false);
+  };
 
   const getAccountsListComponent = () => {
-    const { onChangeAccount } = this;
-
-
     return [
       {
         data: (
@@ -172,7 +170,7 @@ const ConnectPage = () => {
         }
       }
     ];
-  }
+  };
 
   const getNullStyles = () => [
     {

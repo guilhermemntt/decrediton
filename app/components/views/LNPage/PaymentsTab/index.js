@@ -1,3 +1,4 @@
+import { useState, useRef } from "react";
 import { DescriptionHeader } from "layout";
 import { FormattedMessage as T } from "react-intl";
 import Page from "./Page";
@@ -18,6 +19,7 @@ const PaymentsTab = ({ setTimeout, clearTimeout }) => {
   const [decodedPayRequest, setDecodedPayRequest] = useState(null);
   const [decodingError, setDecodingError] = useState(null);
   const [expired, setExpired] = useState(false);
+  const [sending, setSendValue] = useState();
 
   const lastDecodeTimer = useRef(null);
 
@@ -36,9 +38,9 @@ const PaymentsTab = ({ setTimeout, clearTimeout }) => {
       (decodedPayRequest.timestamp + decodedPayRequest.expiry) * 1000 -
       Date.now();
     if (timeToExpire < 0) {
-      setState({ expired: true });
+      setExpired(true);
     }
-  }
+  };
 
   const decodePayRequestCallback = () => {
     lastDecodeTimer.current = null;
@@ -59,9 +61,10 @@ const PaymentsTab = ({ setTimeout, clearTimeout }) => {
         setExpired(expired);
       })
       .catch((error) => {
-        setState({ decodedPayRequest: null, decodingError: error });
+        setDecodedPayRequest(null);
+        setDecodingError(error);
       });
-  }
+  };
 
   const onPayRequestChanged = (e) => {
     setPayRequest(("" + e.target.value).trim());
@@ -71,11 +74,11 @@ const PaymentsTab = ({ setTimeout, clearTimeout }) => {
       clearTimeout(lastDecodeTimer.current);
     }
     lastDecodeTimer.current = setTimeout(decodePayRequestCallback, 1000);
-  }
+  };
 
   const onSendValueChanged = ({ atomValue }) => {
     setSendValueAtom(atomValue);
-  }
+  };
 
   const onSendPayment = () => {
     if (!payRequest || !decodedPayRequest) {
@@ -85,7 +88,7 @@ const PaymentsTab = ({ setTimeout, clearTimeout }) => {
     setDecodedPayRequest(null);
     setSendValue(0);
     sendPayment(payRequest, sendValueAtom);
-  }
+  };
 
   return (
     <Page
