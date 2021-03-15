@@ -11,7 +11,6 @@ import NetworkTab from "./NetworkTab/NetworkTab";
 import WatchtowersTab from "./WatchtowersTab/WatchtowersTab";
 import WatchtowersTabHeader from "./WatchtowersTab/WatchtowersTabHeader";
 import { LN_ICON } from "constants";
-import "style/Documentation.less";
 import { useLNPage } from "./hooks";
 
 const LNPageHeader = () => (
